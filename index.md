@@ -79,7 +79,6 @@ When you are ready with your modifications so far, you are needed to register yo
 ```c++
 ProcessorSlots.push_back(std::make_shared<ProcessorSlot>(ProcessorSlot::Type::MyFirstProcessorSlot, this));
 ```
-
 Make sure that you replace `MyFirstProcessorSlot` with the name you used previously in the enumeration.
 
 ### Finishing
