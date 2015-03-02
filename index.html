@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>GrainAutLine documentation by szotsaki</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>GrainAutLine documentation</h1>
+        <h2></h2>
+        <a href="https://github.com/szotsaki" class="button"><small>Follow me on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="my-first-hello-world-processor" class="anchor" href="#my-first-hello-world-processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>My first „Hello World!” processor!</h1>
+
+<p>This guide will show you how to create the new processor of yours, add some layers to it and set their properties.</p>
+
+<p><em>A bit of disclaimer: this guide will continuously evolve as developer documentations do. But hey, it exists! So it worth to come back from time to time or subscribe to its change-notification. The latest state of this text always reflects the HEAD version of branch „szotsaki”. Generally speaking, if something doesn't work for you, just merge and recompile everything.</em></p>
+
+<h2>
+<a id="so-the-basics" class="anchor" href="#so-the-basics" aria-hidden="true"><span class="octicon octicon-link"></span></a>So, the basics</h2>
+
+<p>You want to write a processor which does some calculations. You also want to show your work and later maybe interact with it on the GUI. For all of these you are needed to deal with three classes:
+1. <code>Processor</code>: of course this is the most important one. All the essence of your work goes mostly here.
+2. <code>Layer</code>: if you want some show-off, you'll also need this. Or these. You have the possibility to attach more layers to a processor.
+3. <code>ProcessorSlot</code>: last but not least, a structure is needed which encompasses these aforementioned classes together. You won't need to care about this much though, its defaults are just perfect.</p>
+
+<h3>
+<a id="processors" class="anchor" href="#processors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processors</h3>
+
+<p>First, start with the <code>Processor</code>. It has a <em>name</em> and arbitrary number of custom <em>properties</em>. The processor-related files are stored with the model, in the <tt>MarbeCommon/Processors</tt> directory. To create your first processor, let's call it <code>FirstProcessor</code>, you have to subclass from the abstract <code>Processor</code> class like this:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-st">class</span> <span class="pl-en">FirstProcessor</span> : <span class="pl-st">public</span> <span class="pl-en">Processor</span>
+{
+    Q_OBJECT
+<span class="pl-s">public:</span>
+    <span class="pl-en">FirstProcessor</span>(QObject *parent = <span class="pl-v">nullptr</span>);
+    <span class="pl-en">~FirstProcessor</span>() = <span class="pl-k">default</span>;
+}<span class="pl-ii"></span></pre></div>
+
+<p>The <code>Q_OBJECT</code> macro is necessary because of some boring administration reasons. The <code>parent</code> pointer is necessary because <a href="http://www.qt.io/">Qt</a> maintains a hierarchy of the declared objects for easier deletion among others. After that you see the constructor and destructor. Here is, how to define this class:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-en">FirstProcessor::FirstProcessor</span>(QObject *parent)
+    : Processor(<span class="pl-s1"><span class="pl-pds">"</span>My first Processor<span class="pl-pds">"</span></span>, parent)
+{
+}</pre></div>
+
+<p>We pass the name of our processor (which will be shown on the GUI) to the parent constructor.</p>
+
+<h3>
+<a id="layers" class="anchor" href="#layers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Layers</h3>
+
+<p>Now, head towards to the <code>Layers</code>.</p>
+
+<p>The resemblance is uncanny with the processors. You will just have to create a new <code>Layer</code> class of yours (call it, for the sake of simplicity, <code>FirstLayer</code>), make it a descendant of the <code>Layer</code> abstract class and pass your <em>layer's name</em> to the parent constructor. The layer-related files lie with other GUI files, in the <tt>GrainAutLine/Layers</tt> directory. A very basic implementation would look like this:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-st">class</span> <span class="pl-en">FirstLayer</span> : <span class="pl-st">public</span> <span class="pl-en">Layer</span>
+{
+    Q_OBJECT
+<span class="pl-s">public:</span>
+    <span class="pl-s">explicit</span> <span class="pl-en">FirstLayer</span>(QObject *parent = <span class="pl-v">nullptr</span>);
+    <span class="pl-en">~FirstLayer</span>() = <span class="pl-k">default</span>;
+}<span class="pl-ii"></span></pre></div>
+
+<div class="highlight highlight-c++"><pre><span class="pl-en">FirstLayer::FirstLayer</span>(QObject *parent)
+    : Layer(<span class="pl-s1"><span class="pl-pds">"</span>My first layer<span class="pl-pds">"</span></span>, parent)
+{
+}</pre></div>
+
+<h3>
+<a id="the-processorslot" class="anchor" href="#the-processorslot" aria-hidden="true"><span class="octicon octicon-link"></span></a>The ProcessorSlot</h3>
+
+<p>Let's finish with the encapsulating class, the <code>ProcessorSlot</code>.</p>
+
+<p>First, you need to shortly name your work you did so far. The name of the compilation will appear only in code but it should be expressive for other developers. Register this name in the <code>ProcessorSlot::Type</code> enumeration. Now you can create a new specific instance of <code>ProcessorSlot</code>: please, usher yourself to the hall of the <code>ProcessorSlot</code> constructor and supplement the switch-case structure with the name of your choice.</p>
+
+<p>The <code>Processor_</code> variable will hold your custom processor. Create a new instance of it:</p>
+
+<div class="highlight highlight-c++"><pre>Processor_ = std::make_shared&lt;FirstProcessor&gt;(<span class="pl-v">this</span>);</pre></div>
+
+<p>The <code>Layers</code> vector holds all the layers you want to use later. Previously we created only one, <code>FirstLayer</code>, but feel free to either add it multiple times or create many different layers later and add them here:</p>
+
+<div class="highlight highlight-c++"><pre>Layers.push_back(std::make_shared&lt;FirstLayer&gt;(<span class="pl-v">this</span>));</pre></div>
+
+<h3>
+<a id="the-almighty-encapsulator-the-slotmanager" class="anchor" href="#the-almighty-encapsulator-the-slotmanager" aria-hidden="true"><span class="octicon octicon-link"></span></a>The almighty encapsulator: the SlotManager</h3>
+
+<p>Maybe there's a slight chance you've been wondering if there is a encapsulation class for <code>Layers</code> and <code>Processors</code> (this is the <code>ProcessorSlot</code>), is there a similar container for many <code>ProcessorSlots</code>? Yes, there is. It is called <code>SlotManager</code> which, not surprisingly, manages the life cycles of <code>ProcessorSlots</code>.</p>
+
+<p>When you are ready with your modifications so far, you are needed to register your <code>ProcessorSlot</code> in <code>SlotManager</code>. This is quite easy, just add your class to the following container in its constructor like this:</p>
+
+<div class="highlight highlight-c++"><pre>ProcessorSlots.push_back(std::make_shared&lt;ProcessorSlot&gt;(ProcessorSlot::Type::MyFirstProcessorSlot, <span class="pl-v">this</span>));</pre></div>
+
+<p>Make sure that you replace <code>MyFirstProcessorSlot</code> with the name you used previously in the enumeration.</p>
+
+<h3>
+<a id="finishing" class="anchor" href="#finishing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finishing</h3>
+
+<p>You created a new  <code>Processor</code> and a new <code>Layer</code>. Then you added them to the their encapsulation class, <code>ProcessorSlot</code>. After that you registered this processor slot at their manager, <code>SlotManager</code>.</p>
+
+<p>Now, we are ready. Oh, just one thing: make sure that your processor computes and layer draws. How easy to say that, isn't it? Well, it will surely be a joyful journey. For the beginning, define and override the following functions:</p>
+
+<ul>
+<li>for the computation itself:</li>
+</ul>
+
+<div class="highlight highlight-c++"><pre><span class="pl-s">virtual</span> <span class="pl-st">bool</span> <span class="pl-en">FirstProcessor::Step</span>(ProcessingStateDescriptor&amp; psd) <span class="pl-s">override</span>;</pre></div>
+
+<ul>
+<li>and for the drawing:</li>
+</ul>
+
+<div class="highlight highlight-c++"><pre><span class="pl-s">virtual</span> <span class="pl-st">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-s">const</span> ProcessingStateDescriptor&amp; psd) <span class="pl-s">override</span>;</pre></div>
+
+<p>Have a nice time coding!</p>
+        </section>
+
+        <aside id="sidebar">
+
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
