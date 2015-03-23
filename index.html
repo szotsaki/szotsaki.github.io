@@ -38,20 +38,26 @@
 <h2>
 <a id="so-the-basics" class="anchor" href="#so-the-basics" aria-hidden="true"><span class="octicon octicon-link"></span></a>So, the basics</h2>
 
-<p>You want to write a processor which does some calculations. You also want to show your work and later maybe interact with it on the GUI. For all of these you are needed to deal with three classes:
-1. <code>Processor</code>: of course this is the most important one. All the essence of your work goes mostly here.
-2. <code>Layer</code>: if you want some show-off, you'll also need this. Or these. You have the possibility to attach more layers to a processor.
-3. <code>ProcessorSlot</code>: last but not least, a structure is needed which encompasses these aforementioned classes together. You won't need to care about this much though, its defaults are just perfect.</p>
+<p>You want to write a processor which does some calculations. You also want to show your work and later maybe interact with it on the GUI. For all of these you are needed to deal with three classes:</p>
+
+<ol>
+<li>
+<code>Processor</code>: of course this is the most important one. All the essence of your work goes mostly here.</li>
+<li>
+<code>Layer</code>: if you want some show-off, you'll also need this. Or these. You have the possibility to attach more layers to a processor.</li>
+<li>
+<code>ProcessorSlot</code>: last but not least, a structure is needed which encompasses these aforementioned classes together. You won't need to care about this much though, its defaults are just perfect.</li>
+</ol>
 
 <h3>
 <a id="processors" class="anchor" href="#processors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processors</h3>
 
 <p>First, start with the <code>Processor</code>. It has a <em>name</em> and arbitrary number of custom <em>properties</em>. The processor-related files are stored with the model, in the <tt>MarbeCommon/Processors</tt> directory. To create your first processor, let's call it <code>FirstProcessor</code>, you have to subclass from the abstract <code>Processor</code> class like this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-st">class</span> <span class="pl-en">FirstProcessor</span> : <span class="pl-st">public</span> <span class="pl-en">Processor</span>
+<div class="highlight highlight-c++"><pre><span class="pl-k">class</span> <span class="pl-en">FirstProcessor</span> : <span class="pl-k">public</span> <span class="pl-en">Processor</span>
 {
     Q_OBJECT
-<span class="pl-s">public:</span>
+<span class="pl-k">public:</span>
     <span class="pl-en">FirstProcessor</span>(QObject *parent = <span class="pl-v">nullptr</span>);
     <span class="pl-en">~FirstProcessor</span>() = <span class="pl-k">default</span>;
 }<span class="pl-ii"></span></pre></div>
@@ -59,7 +65,7 @@
 <p>The <code>Q_OBJECT</code> macro is necessary because of some boring administration reasons. The <code>parent</code> pointer is necessary because <a href="http://www.qt.io/">Qt</a> maintains a hierarchy of the declared objects for easier deletion among others. After that you see the constructor and destructor. Here is, how to define this class:</p>
 
 <div class="highlight highlight-c++"><pre><span class="pl-en">FirstProcessor::FirstProcessor</span>(QObject *parent)
-    : Processor(<span class="pl-s1"><span class="pl-pds">"</span>My first Processor<span class="pl-pds">"</span></span>, parent)
+    : Processor(<span class="pl-s"><span class="pl-pds">"</span>My first Processor<span class="pl-pds">"</span></span>, parent)
 {
 }</pre></div>
 
@@ -72,16 +78,16 @@
 
 <p>The resemblance is uncanny with the processors. You will just have to create a new <code>Layer</code> class of yours (call it, for the sake of simplicity, <code>FirstLayer</code>), make it a descendant of the <code>Layer</code> abstract class and pass your <em>layer's name</em> to the parent constructor. The layer-related files lie with other GUI files, in the <tt>GrainAutLine/Layers</tt> directory. A very basic implementation would look like this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-st">class</span> <span class="pl-en">FirstLayer</span> : <span class="pl-st">public</span> <span class="pl-en">Layer</span>
+<div class="highlight highlight-c++"><pre><span class="pl-k">class</span> <span class="pl-en">FirstLayer</span> : <span class="pl-k">public</span> <span class="pl-en">Layer</span>
 {
     Q_OBJECT
-<span class="pl-s">public:</span>
-    <span class="pl-s">explicit</span> <span class="pl-en">FirstLayer</span>(QObject *parent = <span class="pl-v">nullptr</span>);
+<span class="pl-k">public:</span>
+    <span class="pl-k">explicit</span> <span class="pl-en">FirstLayer</span>(QObject *parent = <span class="pl-v">nullptr</span>);
     <span class="pl-en">~FirstLayer</span>() = <span class="pl-k">default</span>;
 }<span class="pl-ii"></span></pre></div>
 
 <div class="highlight highlight-c++"><pre><span class="pl-en">FirstLayer::FirstLayer</span>(QObject *parent)
-    : Layer(<span class="pl-s1"><span class="pl-pds">"</span>My first layer<span class="pl-pds">"</span></span>, parent)
+    : Layer(<span class="pl-s"><span class="pl-pds">"</span>My first layer<span class="pl-pds">"</span></span>, parent)
 {
 }</pre></div>
 
@@ -103,7 +109,7 @@
 <h3>
 <a id="the-almighty-encapsulator-the-slotmanager" class="anchor" href="#the-almighty-encapsulator-the-slotmanager" aria-hidden="true"><span class="octicon octicon-link"></span></a>The almighty encapsulator: the SlotManager</h3>
 
-<p>Maybe there's a slight chance you've been wondering if there is a encapsulation class for <code>Layers</code> and <code>Processors</code> (this is the <code>ProcessorSlot</code>), is there a similar container for many <code>ProcessorSlots</code>? Yes, there is. It is called <code>SlotManager</code> which, not surprisingly, manages the life cycles of <code>ProcessorSlots</code>.</p>
+<p>Maybe there's a slight chance you've been wondering if there is an encapsulation class for <code>Layers</code> and <code>Processors</code> (this is the <code>ProcessorSlot</code>), is there a similar container for many <code>ProcessorSlots</code>? Yes, there is. It is called <code>SlotManager</code> which, not surprisingly, manages the life cycles of <code>ProcessorSlots</code>.</p>
 
 <p>When you are ready with your modifications so far, you are needed to register your <code>ProcessorSlot</code> in <code>SlotManager</code>. This is quite easy, just add your class to the following container in its constructor like this:</p>
 
@@ -122,15 +128,165 @@
 <li>for the computation itself:</li>
 </ul>
 
-<div class="highlight highlight-c++"><pre><span class="pl-s">virtual</span> <span class="pl-st">bool</span> <span class="pl-en">FirstProcessor::Step</span>(ProcessingStateDescriptor&amp; psd) <span class="pl-s">override</span>;</pre></div>
+<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">bool</span> <span class="pl-en">FirstProcessor::Step</span>(ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
 
 <ul>
 <li>and for the drawing:</li>
 </ul>
 
-<div class="highlight highlight-c++"><pre><span class="pl-s">virtual</span> <span class="pl-st">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-s">const</span> ProcessingStateDescriptor&amp; psd) <span class="pl-s">override</span>;</pre></div>
+<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
 
 <p>Have a nice time coding!</p>
+
+<h1>
+<a id="reference-documentation" class="anchor" href="#reference-documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference documentation</h1>
+
+<p>From now on, we are going through the different trifles of the API to make you get most out of the programming interface.</p>
+
+<h2>
+<a id="processorslot" class="anchor" href="#processorslot" aria-hidden="true"><span class="octicon octicon-link"></span></a>ProcessorSlot</h2>
+
+<p>As we saw prevously, a <code>ProcessorSlot</code> encompasses exactly one <code>Processor</code> and an arbitrary number of <code>Layers</code>.</p>
+
+<h3>
+<a id="elementary-processorslots" class="anchor" href="#elementary-processorslots" aria-hidden="true"><span class="octicon octicon-link"></span></a>Elementary ProcessorSlots</h3>
+
+<p>An <em>elementary</em> <code>ProcessorSlot</code> has the following properties:</p>
+
+<ul>
+<li>Its <code>Processor</code> always runs regardless of everything. This is necessary for making such fundamental tasks done like the raw image rendering.</li>
+<li>Its <code>Processor</code> name doesn't show up in the drop-down processor selector list on the GUI, so it cannot be selected to run alone.</li>
+<li>This infers that an elementary <code>Processor</code> cannot have properties configured from the GUI, since its property window will never be displayed.</li>
+<li>Nevertheless, it still can have as many layers as you want and these layers are always shown until the user decides to turn them off.</li>
+<li>An elementary <code>ProcessorSlot</code> (and its containees) by default don't receive mouse events, however this can be configured in code.</li>
+</ul>
+
+<p>To make a <code>ProcessorSlot</code> elementary, just set the <code>Elementary_</code> variable to <code>true</code> in the <code>ProcessorSlot</code> constructor. Just like the following example does:</p>
+
+<div class="highlight highlight-c++"><pre>[…]
+<span class="pl-k">case</span> Type::ShowImage:
+        Processor_ = std::make_shared&lt;ShowImageProcessor&gt;(<span class="pl-v">this</span>);
+        Layers.push_back(std::make_shared&lt;ShowImageLayer&gt;(<span class="pl-v">this</span>));
+        Elementary_ = <span class="pl-c1">true</span>;
+        <span class="pl-k">break</span>;
+[…]</pre></div>
+
+<p>This property cannot be modified at run-time.</p>
+
+<p>Please, pay attention to instantiate your elementary <code>ProcessorSlot</code> in the right section of the <code>SlotManager</code> constructor. A comment line indicates where these are going.</p>
+
+<h3>
+<a id="supplementary-canvas" class="anchor" href="#supplementary-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Supplementary canvas</h3>
+
+<p>A <em>supplementary canvas</em> is a small area displaying custom layers which is bound to a <code>ProcessorSlot</code> and shown on the right hand side of the GUI.</p>
+
+<p>This feature is under construction; please check back a while later for documentation.</p>
+
+<h2>
+<a id="processor" class="anchor" href="#processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processor</h2>
+
+<h3>
+<a id="processor-properties" class="anchor" href="#processor-properties" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processor properties</h3>
+
+<p>A processor is a rather complex entity, therefore it needs some <em>properties</em> to fine-tune itself. These properties are shown on the GUI and freely configurable by the user. All properties have a <em>name</em>, a <em>default value</em> and of course they hold their <em>current value</em>.</p>
+
+<p>To add a property to your <code>Processor</code>, simply call the <code>AddProperty</code> method in your <code>Processor</code> constructor.</p>
+
+<p>Currently, there are two different kinds of properties you can use:</p>
+
+<ol>
+<li>
+<em>Float type</em>: You can store a <code>float</code> value inside with a <em>minimum</em> and <em>maximum</em> range provided.</li>
+</ol>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(QString &amp;&amp;name, <span class="pl-k">const</span> <span class="pl-k">float</span> minimum, <span class="pl-k">const</span> <span class="pl-k">float</span> maximum, <span class="pl-k">const</span> <span class="pl-k">float</span> default_);</pre></div>
+
+<ol>
+<li>
+<em>Boolean type</em>: You can store a <code>bool</code> value inside.</li>
+</ol>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(QString &amp;&amp;name, <span class="pl-k">const</span> <span class="pl-k">bool</span> default_);</pre></div>
+
+<p>For how to query the properties and be notified when they change, please visit back a bit later.</p>
+
+<h3>
+<a id="overriding-run" class="anchor" href="#overriding-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overriding Run()</h3>
+
+<p>A <code>Processor</code> works this simplified way: when a mouse click occurred or a new image file was loaded, the <code>Run</code> method starts and calls <code>Step</code> until it returns <code>false</code>. If you need more elaborate control, you can override this method. Its default implementation looks like the following:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">Processor::Run</span>(ProcessingStateDescriptor&amp; psd)
+{
+    <span class="pl-k">while</span>(<span class="pl-c1">Step</span>(psd) == <span class="pl-c1">true</span>)
+        ;
+
+    emit <span class="pl-smi">ComputationReady</span>(psd);
+}</pre></div>
+
+<p>Please, always emit the <code>ComputationReady</code> signal when the <code>Run</code> process finishes.</p>
+
+<h3>
+<a id="getting-the-current-mouse-coordinates" class="anchor" href="#getting-the-current-mouse-coordinates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the current mouse coordinates</h3>
+
+<p>When a mouse click occurred, you can be sure that the <code>MouseCoordinates</code> member contains the current position. If no click occurred (e.g. after an image loaded), this member contains the (0, 0) coordinate.</p>
+
+<p>The top-left image coordinate is (0, 0) and is resize-agnostic.</p>
+
+<p>On reading out the value from this member, please refer to the <a href="http://doc.qt.io/qt-5/qpointf.html">QPointF documentation</a>.</p>
+
+<h2>
+<a id="layers-1" class="anchor" href="#layers-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Layers</h2>
+
+<p>A <code>Layer</code> renders a bit of portion of the main image which will be blended into the renderings of other layers. After all the layers created their own <code>cv::Mat</code> image, the so called <code>ImageProvider</code> collects and flattens them into the final image which will be shown to user on the canvas(es).</p>
+
+<p>The layer concept is under construction, so the documentation is unfinished yet.</p>
+
+<h3>
+<a id="sequences" class="anchor" href="#sequences" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sequences</h3>
+
+<p>Each <code>Layer</code> has a number, called <code>Sequence</code>. This defines the order of layers to render on each other. You can query this number if you need by using member function <code>GetSequence</code> but please, by any means, do <em>not</em> ever change this value!</p>
+
+<h3>
+<a id="rendering" class="anchor" href="#rendering" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rendering</h3>
+
+<p>This is the function in you are free to leverage your creativity. One thing you need to pay a bit attention to: always emit the <em>iAmReadyWithRendering</em> signal, here called <code>RenderReady</code>. For example like this:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd)
+{
+    <span class="pl-c">// Generate image to cv::Mat</span>
+    <span class="pl-k">const</span> cv::Mat image = psd.<span class="pl-c1">ExportToImage</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
+
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetSequence</span>(), image, <span class="pl-c1">true</span>);
+}</pre></div>
+
+<p>The signal signature is the following:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">RenderReady</span>(<span class="pl-k">const</span> <span class="pl-k">int</span> layerSequence, <span class="pl-c">// Sequence ID of the current layer</span>
+                 <span class="pl-k">const</span> cv::Mat&amp; mat,      <span class="pl-c">// The finished image in cv::Mat format</span>
+                 <span class="pl-k">const</span> <span class="pl-k">bool</span> dirty);       <span class="pl-c">// true only if the cv::Mat has been changed</span></pre></div>
+
+<h3>
+<a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h3>
+
+<p>Since converting many cv::Mats from the processors on every pixel the mouse advanced to can be a really time consuming operation, always use cache. If the <code>Layer</code> knows that the image didn't change, recall the previously rendered <code>cv::Mat</code> from member variable <code>Cache</code>. An example showing this:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">ShowImageLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor &amp;psd)
+{
+    <span class="pl-k">bool</span> dirty = <span class="pl-c1">true</span>;
+
+    <span class="pl-k">if</span> (Cache.<span class="pl-smi">data</span> == <span class="pl-v">nullptr</span>) {
+        cv::Mat imgOriginal = <span class="pl-c1">cv::imread</span>(psd.<span class="pl-smi">ImageFileName</span>, CV_LOAD_IMAGE_COLOR);
+        <span class="pl-c1">Q_ASSERT</span>(imgOriginal.<span class="pl-smi">data</span>);
+
+        Cache = imgOriginal;
+    } <span class="pl-k">else</span> {
+        dirty = <span class="pl-c1">false</span>;
+    }
+
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetSequence</span>(), Cache, dirty);
+}</pre></div>
+
+<p>Beware that your condition on invalidating the cache might be different.</p>
         </section>
 
         <aside id="sidebar">
