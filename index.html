@@ -188,7 +188,7 @@
 <h3>
 <a id="processor-properties" class="anchor" href="#processor-properties" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processor properties</h3>
 
-<p>A processor is a rather complex entity, therefore it needs some <em>properties</em> to fine-tune itself. These properties are shown on the GUI and freely configurable by the user. All properties have a <em>name</em>, a <em>default value</em> and of course they hold their <em>current value</em>.</p>
+<p>A processor is a rather complex entity, therefore it needs some <em>properties</em> to fine-tune itself. These properties are shown on the GUI and freely configurable by the user. All properties have a unique <em>name</em>, a <em>default value</em> and of course they hold their <em>current value</em>.</p>
 
 <p>To add a property to your <code>Processor</code>, simply call the <code>AddProperty</code> method in your <code>Processor</code> constructor.</p>
 
@@ -196,19 +196,28 @@
 
 <ol>
 <li>
-<em>Float type</em>: You can store a <code>float</code> value inside with a <em>minimum</em> and <em>maximum</em> range provided.</li>
-</ol>
+<p><em>Float type</em>: You can store a <code>float</code> value inside with a <em>minimum</em> and <em>maximum</em> range provided.</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(QString &amp;&amp;name, <span class="pl-k">const</span> <span class="pl-k">float</span> minimum, <span class="pl-k">const</span> <span class="pl-k">float</span> maximum, <span class="pl-k">const</span> <span class="pl-k">float</span> default_);</pre></div>
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
+                 <span class="pl-k">const</span> <span class="pl-k">float</span> minimum,
+                 <span class="pl-k">const</span> <span class="pl-k">float</span> maximum,
+                 <span class="pl-k">const</span> <span class="pl-k">float</span> default_);</pre></div>
 
-<ol>
+<p>Reading its value is possible by its name with the following function:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">float</span> <span class="pl-en">GetFloatPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
+</li>
 <li>
-<em>Boolean type</em>: You can store a <code>bool</code> value inside.</li>
+<p><em>Boolean type</em>: You can store a <code>bool</code> value inside.</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
+                 <span class="pl-k">const</span> <span class="pl-k">bool</span> default_);</pre></div>
+
+<p>Reading its value is possible by its name with the following function:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">bool</span> <span class="pl-en">GetBoolPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
+</li>
 </ol>
-
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(QString &amp;&amp;name, <span class="pl-k">const</span> <span class="pl-k">bool</span> default_);</pre></div>
-
-<p>For how to query the properties and be notified when they change, please visit back a bit later.</p>
 
 <h3>
 <a id="overriding-run" class="anchor" href="#overriding-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overriding Run()</h3>
