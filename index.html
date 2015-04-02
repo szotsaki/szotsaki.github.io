@@ -1,34 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
+    <meta charset="UTF-8">
     <title>GrainAutLine documentation by szotsaki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
-    <header>
-      <div class="inner">
-        <h1>GrainAutLine documentation</h1>
-        <h2></h2>
-        <a href="https://github.com/szotsaki" class="button"><small>Follow me on</small> GitHub</a>
-      </div>
-    </header>
+    <section class="page-header">
+      <h1 class="project-name">GrainAutLine documentation</h1>
+      <h2 class="project-tagline"></h2>
+    </section>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="my-first-hello-world-processor" class="anchor" href="#my-first-hello-world-processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>My first „Hello World!” processor!</h1>
 
 <p>This guide will show you how to create the new processor of yours, add some layers to it and set their properties.</p>
@@ -44,7 +32,7 @@
 <li>
 <code>Processor</code>: of course this is the most important one. All the essence of your work goes mostly here.</li>
 <li>
-<code>Layer</code>: if you want some show-off, you'll also need this. Or these. You have the possibility to attach more layers to a processor.</li>
+<code>Layer</code>: if you want some show-off, you'll also need this. Or these. You have the possibility to attach more layers to a processor. Or none. It's truly your choice whether you want to show something to the world.</li>
 <li>
 <code>ProcessorSlot</code>: last but not least, a structure is needed which encompasses these aforementioned classes together. You won't need to care about this much though, its defaults are just perfect.</li>
 </ol>
@@ -105,6 +93,8 @@
 <p>The <code>Layers</code> vector holds all the layers you want to use later. Previously we created only one, <code>FirstLayer</code>, but feel free to either add it multiple times or create many different layers later and add them here:</p>
 
 <div class="highlight highlight-c++"><pre>Layers.push_back(std::make_shared&lt;FirstLayer&gt;(<span class="pl-v">this</span>));</pre></div>
+
+<p>Note that layers are optional extensions for a <code>Processor</code> determined to show the internal state of the latter. Therefore it's not necessary to attach a layer at all.</p>
 
 <h3>
 <a id="the-almighty-encapsulator-the-slotmanager" class="anchor" href="#the-almighty-encapsulator-the-slotmanager" aria-hidden="true"><span class="octicon octicon-link"></span></a>The almighty encapsulator: the SlotManager</h3>
@@ -271,6 +261,15 @@
 <p>The layer concept is under construction, so the documentation is unfinished yet.</p>
 
 <h3>
+<a id="accessing-to-its-processor" class="anchor" href="#accessing-to-its-processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Accessing to its Processor</h3>
+
+<p>It is an easy task since it involves only calling the <code>GetProcessor</code> getter from anywhere inside the Layer's function. Calling this getter it's your responsibility to specify exactly that type of <code>Processor</code> which belongs to the current <code>Layer</code>. The return value of this function is a <code>std::shared_ptr</code> so handle it like a normal pointer type.</p>
+
+<p>An example which calls the custom <code>CreateMagic()</code> function of your <code>FirstProcessor</code>:</p>
+
+<div class="highlight highlight-c++"><pre>GetProcessor&lt;FirstProcessor&gt;()-&gt;<span class="pl-en">CreateMagic</span>();</pre></div>
+
+<h3>
 <a id="sequences" class="anchor" href="#sequences" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sequences</h3>
 
 <p>Each <code>Layer</code> has a number, called <code>Sequence</code>. This defines the order of layers to render on each other. You can query this number if you need by using member function <code>GetSequence</code> but please, by any means, do <em>not</em> ever change this value!</p>
@@ -316,16 +315,15 @@
 }</pre></div>
 
 <p>Beware that your condition on invalidating the cache might be different.</p>
-        </section>
 
-        <aside id="sidebar">
+      <footer class="site-footer">
 
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
 
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
+    </section>
 
   
   </body>
 </html>
+
