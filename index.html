@@ -103,7 +103,9 @@
 
 <p>When you are ready with your modifications so far, you are needed to register your <code>ProcessorSlot</code> in <code>SlotManager</code>. This is quite easy, just add your class to the following container in its constructor like this:</p>
 
-<div class="highlight highlight-c++"><pre>ProcessorSlots.push_back(std::make_shared&lt;ProcessorSlot&gt;(ProcessorSlot::Type::MyFirstProcessorSlot, <span class="pl-v">this</span>));</pre></div>
+<div class="highlight highlight-c++"><pre>NonElementarySlots.push_back(
+    std::make_shared&lt;ProcessorSlot&gt;(ProcessorSlot::Type::MyFirstProcessorSlot, <span class="pl-v">this</span>)
+  );</pre></div>
 
 <p>Make sure that you replace <code>MyFirstProcessorSlot</code> with the name you used previously in the enumeration.</p>
 
