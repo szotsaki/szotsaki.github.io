@@ -247,11 +247,11 @@
 <h3>
 <a id="run-on-a-mouse-event" class="anchor" href="#run-on-a-mouse-event" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run on a mouse event</h3>
 
-<p>Virtual functions <code>MouseClicked</code> and <code>MouseClickedAndDragged</code> are implemented in a way if the <code>Processor</code> receives the event, store the coordinates and start the <code>Run</code> method.</p>
+<p>Virtual functions <code>MouseClicked</code> and <code>MouseClickedAndDragged</code> are implemented in a way if the <code>Processor</code> receives the event, store the coordinates. After that the current <code>Processor</code> will run as well as the elementary processors for drawing and blending the resulting image.</p>
 
 <p>These functions are automatically called if a click or a drag event occurred and the <code>Processor</code> was subscribed to it.</p>
 
-<p>If you want another behaviour, override them:</p>
+<p>If you want another behaviour, override these <code>protected</code> functions:</p>
 
 <div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseClicked</span>(<span class="pl-k">const</span> QString&amp; canvasName,
                           <span class="pl-k">const</span> QPointF&amp; coordinates,
@@ -294,7 +294,7 @@
 <h3>
 <a id="rendering" class="anchor" href="#rendering" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rendering</h3>
 
-<p>This is the function in you are free to leverage your creativity. One thing you need to pay a bit attention to: always emit the <em>iAmReadyWithRendering</em> signal, here called <code>RenderReady</code>. For example like this:</p>
+<p>This is the function in you are free to leverage your creativity. One thing you need to pay a bit attention to: emit the <em>iAmReadyWithRendering</em> signal, here called <code>RenderReady</code> if you want your layer image to be shown. For example like this:</p>
 
 <div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd)
 {
