@@ -150,7 +150,6 @@
 <li>Its <code>Processor</code> name doesn't show up in the drop-down processor selector list on the GUI, so it cannot be selected to run alone.</li>
 <li>This infers that an elementary <code>Processor</code> cannot have properties configured from the GUI, since its property window will never be displayed.</li>
 <li>Nevertheless, it still can have as many layers as you want and these layers are always shown until the user decides to turn them off.</li>
-<li>An elementary <code>ProcessorSlot</code> (and its containees) by default don't receive mouse events, however this can be configured in <code>SlotManager</code> constructor following to the comment there.</li>
 </ul>
 
 <p>To make a <code>ProcessorSlot</code> elementary, just set the <code>Elementary_</code> variable to <code>true</code> in the <code>ProcessorSlot</code> constructor. Just like the following example does:</p>
@@ -227,48 +226,81 @@
 <p>Please, always emit the <code>ComputationReady</code> signal when the <code>Run</code> process finishes.</p>
 
 <h3>
-<a id="subscribing-to-the-mouse-events" class="anchor" href="#subscribing-to-the-mouse-events" aria-hidden="true"><span class="octicon octicon-link"></span></a>Subscribing to the mouse events</h3>
+<a id="mouse-handling" class="anchor" href="#mouse-handling" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mouse handling</h3>
 
-<p>There are two types of mouse events exist:</p>
+<h4>
+<a id="subscribing-to-the-mouse-events" class="anchor" href="#subscribing-to-the-mouse-events" aria-hidden="true"><span class="octicon octicon-link"></span></a>Subscribing to the mouse events</h4>
 
-<ul>
-<li>mouse <em>click</em> and</li>
-<li>mouse click and move while holding, here called mouse <em>click and drag</em>.</li>
-</ul>
+<p>There are four types of mouse events exist:</p>
 
-<p>The first one is useful for one-shot actions like running the processor after a click was made at a certain coordinate. The latter is best for continuous actions like drawing. You can freely subscribe to each of them independently with your processor.</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QEvent::MouseButtonPress</code></td>
+<td>Mouse press</td>
+</tr>
+<tr>
+<td><code>QEvent::MouseButtonRelease</code></td>
+<td>Mouse release</td>
+</tr>
+<tr>
+<td><code>QEvent::MouseButtonDblClick</code></td>
+<td>Mouse press again</td>
+</tr>
+<tr>
+<td><code>QEvent::MouseMove</code></td>
+<td>Mouse move</td>
+</tr>
+</tbody>
+</table>
 
-<p>By default, a <code>Processor</code> doesn't receive these mouse events. To do so, redefine its <code>ReceiveMouseClick</code> or  <code>ReceiveMouseClickAndDrag</code> function and return with true. You can modify its return value any time you want, the changes will come to effect when a new <code>Processor</code> is selected on the GUI.</p>
+<p>The <code>MouseButtonRelease</code> is e.g. useful for one-shot actions like running the processor after a click was made at a certain coordinate. While the <code>MouseMove</code> is best for continuous actions like drawing. You can freely subscribe to each of them independently with your processor.</p>
+
+<p>By default, a <code>Processor</code> doesn't receive these mouse events. To do so, add the desired ones to the <code>SubscribedMouseEvents</code> <a href="http://www.cplusplus.com/reference/unordered_set/unordered_set/"><code>unordered_set</code></a> structure like this:</p>
+
+<div class="highlight highlight-c++"><pre>SubscribedMouseEvents = {QEvent::MouseButtonRelease, QEvent::MouseMove};</pre></div>
+
+<p>You may add them directly at the construction time of your class, although you can modify these values any time you want; the changes will come into effect before the next run of your <code>Processor</code>.</p>
 
 <p>Please note that regardless you are subscribed to the mouse events, your <code>Processor</code> won't receive them if it's not the currently selected one.</p>
 
-<p>Please also note that this sub-chapter only applies to non-elementary processors. For elementary processors refer to the <a href="#elementary-processorslots">Elementary ProcessorSlots</a>  chapter.</p>
+<h4>
+<a id="reacting-to-a-mouse-event" class="anchor" href="#reacting-to-a-mouse-event" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reacting to a mouse event</h4>
 
-<h3>
-<a id="run-on-a-mouse-event" class="anchor" href="#run-on-a-mouse-event" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run on a mouse event</h3>
+<p>Supposing you're already subscribed to the desired mouse events, your processor's will receive them in the following <code>virtual</code> function:</p>
 
-<p>Virtual functions <code>MouseClicked</code> and <code>MouseClickedAndDragged</code> are implemented in a way if the <code>Processor</code> receives the event, store the coordinates. After that the current <code>Processor</code> will run as well as the elementary processors for drawing and blending the resulting image.</p>
+<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent&amp; event,
+                                <span class="pl-k">const</span> QString&amp; canvasId,
+                                ProcessingStateDescriptor&amp; psd)</pre></div>
 
-<p>These functions are automatically called if a click or a drag event occurred and the <code>Processor</code> was subscribed to it.</p>
+<p>The first variable contains the event itself. You can determine its type by using the <code>type()</code> function of its. For example if you are subscribed to the previously mentioned events, you can distinguish between them in the following way:</p>
 
-<p>If you want another behaviour, override these <code>protected</code> functions:</p>
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasId, ProcessingStateDescriptor &amp;psd)
+{
+    <span class="pl-c">// Refresh the MouseEvent variable both on QEvent::MouseButtonRelease and QEvent::MouseMove</span>
+    MouseEvent = event;
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseClicked</span>(<span class="pl-k">const</span> QString&amp; canvasName,
-                          <span class="pl-k">const</span> QPointF&amp; coordinates,
-                          ProcessingStateDescriptor&amp; psd)</pre></div>
+    <span class="pl-k">if</span> (event.<span class="pl-c1">type</span>() == QEvent::MouseButtonRelease) {
+        <span class="pl-c1">MouseClicked</span>(canvasId, psd);
+    }
+}</pre></div>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseClickedAndDragged</span>(<span class="pl-k">const</span> QString&amp; canvasName,
-                                    <span class="pl-k">const</span> QPointF&amp; coordinates,
-                                    ProcessingStateDescriptor&amp; psd)</pre></div>
+<p>The default implementation of this function stores the <code>QMouseEvent</code> object into the <code>MouseEvent</code> member variable. In case you don't need extra handling of the events, you may not want to override this function, just read the <code>MouseEvent</code> member from your <code>Processor</code>.</p>
 
-<h3>
-<a id="getting-the-current-mouse-coordinates" class="anchor" href="#getting-the-current-mouse-coordinates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the current mouse coordinates</h3>
+<h4>
+<a id="getting-the-current-mouse-coordinates" class="anchor" href="#getting-the-current-mouse-coordinates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the current mouse coordinates</h4>
 
-<p>When a mouse click or drag occurred and the processor is set to receive these events, you can be sure that the <code>MouseCoordinates</code> member contains the current position. If no click occurred (e.g. after an image loaded), this member contains the (0, 0) coordinate.</p>
+<p>When a mouse event occurred and the processor is set to receive these events, by default the <code>MouseEvent</code> member contains the current event with its position. Use the <code>pos</code> or <code>localPos</code> functions to read out these coordinates. Please, refer to the <a href="http://doc.qt.io/qt-5/qmouseevent.html">QMouseEvent</a> and <a href="http://doc.qt.io/qt-5/qpoint.html">QPoint</a> documentation on handling these values.</p>
 
-<p>The top-left image coordinate is (0, 0).</p>
+<p>Please note that because of performance reasons functions <code>screenPos</code>, <code>windowPos</code> and <code>globalPos</code> always return with <code>QPoint(0, 0)</code>.</p>
 
-<p>On reading out the value from this member, please refer to the <a href="http://doc.qt.io/qt-5/qpointf.html">QPointF documentation</a>.</p>
+<p>The top-left image coordinate is (0, 0) and the given coordinates are always resize-agnostics.</p>
 
 <h2>
 <a id="layers-1" class="anchor" href="#layers-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Layers</h2>
