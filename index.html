@@ -166,13 +166,6 @@
 
 <p>Please, pay attention to instantiate your elementary <code>ProcessorSlot</code> in the right section of the <code>SlotManager</code> constructor. A comment line indicates where these are going.</p>
 
-<h3>
-<a id="supplementary-canvas" class="anchor" href="#supplementary-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Supplementary canvas</h3>
-
-<p>A <em>supplementary canvas</em> is a small area displaying custom layers which is bound to a <code>ProcessorSlot</code> and shown on the right hand side of the GUI.</p>
-
-<p>This feature is under construction; please check back a while later for documentation.</p>
-
 <h2>
 <a id="processor" class="anchor" href="#processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processor</h2>
 
@@ -276,18 +269,18 @@
 <p>Supposing you're already subscribed to the desired mouse events, your processor will receive them in the following <code>virtual</code> function:</p>
 
 <div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent&amp; event,
-                                <span class="pl-k">const</span> QString&amp; canvasId,
+                                <span class="pl-k">const</span> QString&amp; canvasName,
                                 ProcessingStateDescriptor&amp; psd)</pre></div>
 
 <p>The first variable contains the event itself. You can determine its type by using the <code>type()</code> function of its. For example if you are subscribed to the previously mentioned events, you can distinguish between them in the following way:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasId, ProcessingStateDescriptor &amp;psd)
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
 {
     <span class="pl-c">// Refresh the MouseEvent variable both on QEvent::MouseButtonRelease and QEvent::MouseMove</span>
     MouseEvent = event;
 
     <span class="pl-k">if</span> (event.<span class="pl-c1">type</span>() == QEvent::MouseButtonRelease) {
-        <span class="pl-c1">MouseClicked</span>(canvasId, psd);
+        <span class="pl-c1">MouseClicked</span>(canvasName, psd);
     }
 }</pre></div>
 
@@ -365,6 +358,59 @@
 }</pre></div>
 
 <p>Beware that your condition on invalidating the cache might be different.</p>
+
+<h3>
+<a id="additional-canvases" class="anchor" href="#additional-canvases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Additional canvases</h3>
+
+<p>The system is capable of rendering layers not only on the main canvas but on arbitrary number of canvases.</p>
+
+<p>Note that if your processor is set to receive mouse events, these are forwarded from all the canvases. The originating canvas name is provided in the emitted signal. Be sure to distinguish among them while processing mouse events if your ProcessorSlot has layers which render on different canvases.</p>
+
+<h4>
+<a id="default-canvases" class="anchor" href="#default-canvases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Default canvases</h4>
+
+<p>There are two pre-defined canvases are already in the program, namely:</p>
+
+<ol>
+<li>The <em>main canvas</em>: this is that the users first meet after an image file is opened. By default all the layers render onto this canvas. If you specifically want to declare your layer to render on this one, use its unique name <code>mainCanvas</code>.</li>
+<li>The second, by default supported one is the <em>supplementary canvas</em>. This is a little canvas mainly used as a magnifier of the original picture on the right hand side of the application. If you want your layer to render on this one, use its name <code>supplementaryCanvas</code>.</li>
+</ol>
+
+<h4>
+<a id="making-layers-to-render-on-a-specific-canvas" class="anchor" href="#making-layers-to-render-on-a-specific-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Making layers to render on a specific canvas</h4>
+
+<p>A layer is capable of rendering only on one canvas which has to be defined at compile time and must not be changed during application run.</p>
+
+<p>By default it renders on the main canvas. If you want to specify another render target, override the following virtual function of your layer:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> QString <span class="pl-en">GetTargetCanvas</span>() <span class="pl-k">const</span>;</pre></div>
+
+<p>Then return the target canvas name, e.g. <code>supplementaryCanvas</code>:</p>
+
+<div class="highlight highlight-c++"><pre>QString <span class="pl-en">MyFirstLayer::GetTargetCanvas</span>() <span class="pl-k">const</span>
+{
+    <span class="pl-k">return</span> <span class="pl-c1">QStringLiteral</span>(<span class="pl-s"><span class="pl-pds">"</span>supplementaryCanvas<span class="pl-pds">"</span></span>);
+}</pre></div>
+
+<h4>
+<a id="creating-a-new-canvas" class="anchor" href="#creating-a-new-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a new canvas</h4>
+
+<p>Only two simple places you have to extend when you want to create a new canvas:</p>
+
+<ol>
+<li>
+<p><em>QML</em>: First of all, decide where the new canvas has to be displayed  and then create a <code>PsdCanvas</code> element there in the appropriate QML file. Set the object name to your new canvas name. Something like this:</p>
+
+<div class="highlight highlight-qml"><pre><span class="pl-c1">PsdCanvas</span> {
+<span class="pl-e">    objectName</span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>histogram<span class="pl-pds">"</span></span>
+    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span><span class="pl-k">:</span> <span class="pl-c1">250</span>
+    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredHeight</span><span class="pl-k">:</span> <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span> / <span class="pl-c1">2</span>
+}</pre></div>
+</li>
+<li><p>Right after that, just create a new entry in the <code>ImageProvider::CanvasNames</code> static container with your new canvas name. It is located in the beginning of the <code>ImageProvider.cpp</code> source file.</p></li>
+</ol>
+
+<p>After these two steps, you can use your layers to draw on your custom canvas described in the sub-chapter above.</p>
 
 <h2>
 <a id="debugging" class="anchor" href="#debugging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Debugging</h2>
