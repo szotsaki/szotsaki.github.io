@@ -300,8 +300,6 @@
 
 <p>A <code>Layer</code> renders a bit of portion of the main image which will be blended into the renderings of other layers. After all the layers created their own <code>cv::Mat</code> image, the so called <code>ImageProvider</code> collects and flattens them into the final image which will be shown to user on the canvas(es).</p>
 
-<p>The layer concept is under construction, so the documentation is unfinished yet.</p>
-
 <h3>
 <a id="accessing-to-its-processor" class="anchor" href="#accessing-to-its-processor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Accessing to its Processor</h3>
 
@@ -326,15 +324,16 @@
     <span class="pl-c">// Generate image to cv::Mat</span>
     <span class="pl-k">const</span> cv::Mat image = psd.<span class="pl-c1">ExportToImage</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
 
-    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetSequence</span>(), image, <span class="pl-c1">GetOpacity</span>(), <span class="pl-c1">true</span>);
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), image, <span class="pl-c1">GetOpacity</span>(), <span class="pl-c1">true</span>);
 }</pre></div>
 
 <p>The signal signature is the following:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">RenderReady</span>(<span class="pl-k">const</span> <span class="pl-k">int</span> layerSequence, <span class="pl-c">// Sequence ID of the current layer</span>
-                 <span class="pl-k">const</span> cv::Mat&amp; mat,      <span class="pl-c">// The finished image in cv::Mat format</span>
-                 <span class="pl-k">const</span> <span class="pl-k">float</span> opacity,     <span class="pl-c">// Opacity of the current layer set on the GUI</span>
-                 <span class="pl-k">const</span> <span class="pl-k">bool</span> dirty);       <span class="pl-c">// true only if the cv::Mat has been changed</span></pre></div>
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">RenderReady</span>(<span class="pl-k">const</span> QString&amp; canvasName, <span class="pl-c">// Name of the canvas to draw on</span>
+                 <span class="pl-k">const</span> <span class="pl-k">int</span> layerSequence,   <span class="pl-c">// Sequence ID of the current layer</span>
+                 <span class="pl-k">const</span> cv::Mat&amp; mat,        <span class="pl-c">// The finished image in cv::Mat format</span>
+                 <span class="pl-k">const</span> <span class="pl-k">float</span> opacity,       <span class="pl-c">// Opacity of the current layer set on the GUI</span>
+                 <span class="pl-k">const</span> <span class="pl-k">bool</span> dirty);         <span class="pl-c">// true only if the cv::Mat has been changed</span></pre></div>
 
 <h3>
 <a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h3>
@@ -354,7 +353,7 @@
         dirty = <span class="pl-c1">false</span>;
     }
 
-    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetSequence</span>(), Cache, dirty);
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), Cache, <span class="pl-c1">GetOpacity</span>(), dirty);
 }</pre></div>
 
 <p>Beware that your condition on invalidating the cache might be different.</p>
