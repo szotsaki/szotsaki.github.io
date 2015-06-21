@@ -356,7 +356,15 @@
     emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), Cache, <span class="pl-c1">GetOpacity</span>(), dirty);
 }</pre></div>
 
-<p>Beware that your condition on invalidating the cache might be different.</p>
+<p>Beware, that your condition on invalidating the cache might be different.</p>
+
+<p>Supposedly, your cache depends on the very image file. If a new one got loaded, the cache has to be invalidated. In this case you simply have to override the appropriate function <code>FileOpened</code>. It is defined in classes <code>Processor</code>, <code>Layer</code> and <code>ImageProvider</code>:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Processor::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);
+<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Layer::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);
+<span class="pl-k">void</span> <span class="pl-en">ImageProvider::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);</pre></div>
+
+<p>As soon as this function is invoked, you can be sure a new image file has been loaded already. Be careful as this function gets called both when an image file or a <code>.prc</code> file was opened. If it's needed for your class to differentiate between these formats, use the provided <code>fileName</code> parameter.</p>
 
 <h3>
 <a id="additional-canvases" class="anchor" href="#additional-canvases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Additional canvases</h3>
