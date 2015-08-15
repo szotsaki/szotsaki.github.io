@@ -5,7 +5,7 @@
     <title>GrainAutLine documentation by szotsaki</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
@@ -146,7 +146,9 @@
 <p>An <em>elementary</em> <code>ProcessorSlot</code> has the following properties:</p>
 
 <ul>
-<li>Its <code>Processor</code> always runs regardless of everything. This is necessary for making such fundamental tasks done like the raw image rendering.</li>
+<li>Its <code>Processor</code> always runs regardless of everything. This is necessary for making such fundamental tasks done like the raw image rendering. This means that:
+-- its <code>Processor</code> will run after a non-elementary <code>Processor</code>;
+-- and unconditionally after a key or mouse event occurred.</li>
 <li>Its <code>Processor</code> name doesn't show up in the drop-down processor selector list on the GUI, so it cannot be selected to run alone.</li>
 <li>This infers that an elementary <code>Processor</code> cannot have properties configured from the GUI, since its property window will never be displayed.</li>
 <li>Nevertheless, it still can have as many layers as you want and these layers are always shown until the user decides to turn them off.</li>
@@ -261,7 +263,7 @@
 
 <p>You may add them directly at the construction time of your class, although you can modify these values any time you want; the changes will come into effect before the next run of your <code>Processor</code>.</p>
 
-<p>Please note that regardless you are subscribed to the mouse events, your <code>Processor</code> won't receive them if it's not the currently selected one.</p>
+<p>Please note that regardless whether you are subscribed to the mouse events, your non-elementary <code>Processor</code> won't receive them if it's not the currently selected one.</p>
 
 <h4>
 <a id="reacting-to-a-mouse-event" class="anchor" href="#reacting-to-a-mouse-event" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reacting to a mouse event</h4>
@@ -285,6 +287,27 @@
 }</pre></div>
 
 <p>The default implementation of this function stores the <code>QMouseEvent</code> object into the <code>MouseEvent</code> member variable. In case you don't need extra handling of the events, you may not want to override this function, just read the <code>MouseEvent</code> member from your <code>Processor</code>.</p>
+
+<p>By default a non-elementary <code>Processor</code> won't run after a mouse or keyboard event occurred. To force it, simply call <code>RunInThread()</code> where you want to start the computing like in this custom mouse click handler:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseClicked</span>(<span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
+{
+    <span class="pl-c1">Q_UNUSED</span>(canvasName)
+
+    <span class="pl-c">// This processor is also used to trigger re-rendering without modifying something</span>
+    <span class="pl-c1">RunInThread</span>(psd);
+}</pre></div>
+
+<p>Warning! Always make sure that the <code>ComputationReady</code> signal is emitted from a <em>non-elementary</em> processor's keyboard or mouse event handling function. It can be either a <code>RunInThread</code> call which automatically emits this signal at the end of its run or emit it manually. This guarantees the follow-up elementary processors will run and the screen is refreshed. An example for this:</p>
+
+<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
+{
+    <span class="pl-k">if</span> (event.<span class="pl-c1">type</span>() == QEvent::MouseButtonRelease) {
+        <span class="pl-c1">RunInThread</span>(psd);
+    } <span class="pl-k">else</span> {
+        emit <span class="pl-smi">ComputationReady</span>(psd);
+    }
+}</pre></div>
 
 <h4>
 <a id="getting-the-current-mouse-coordinates" class="anchor" href="#getting-the-current-mouse-coordinates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the current mouse coordinates</h4>
@@ -501,4 +524,3 @@
   
   </body>
 </html>
-
