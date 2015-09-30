@@ -42,7 +42,7 @@
 
 <p>First, start with the <code>Processor</code>. It has a <em>name</em> and arbitrary number of custom <em>properties</em>. The processor-related files are stored with the model, in the <tt>MarbeCommon/Processors</tt> directory. To create your first processor, let's call it <code>FirstProcessor</code>, you have to subclass from the abstract <code>Processor</code> class like this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">class</span> <span class="pl-en">FirstProcessor</span> : <span class="pl-k">public</span> <span class="pl-en">Processor</span>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">class</span> <span class="pl-en">WIN_DLL_DECLSPEC</span> FirstProcessor : public Processor
 {
     Q_OBJECT
 <span class="pl-k">public:</span>
@@ -50,9 +50,13 @@
     <span class="pl-en">~FirstProcessor</span>() = <span class="pl-k">default</span>;
 }<span class="pl-ii"></span></pre></div>
 
-<p>The <code>Q_OBJECT</code> macro is necessary because of some boring administration reasons. The <code>parent</code> pointer is necessary because <a href="http://www.qt.io/">Qt</a> maintains a hierarchy of the declared objects for easier deletion among others. After that you see the constructor and destructor. Here is, how to define this class:</p>
+<p>The <code>Q_OBJECT</code> macro is necessary because of some boring administration reasons. The <code>parent</code> pointer is necessary because <a href="http://www.qt.io/">Qt</a> maintains a hierarchy of the declared objects for easier deletion among others.</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-en">FirstProcessor::FirstProcessor</span>(QObject *parent)
+<p>The <code>WIN_DLL_DECLSPEC</code> is necessary because Windows is able to load <em>library</em> classes only when either the <code>__declspec(dllexport)</code> or <code>__declspec(dllimport)</code> is present before the class name. This macro helps decide when to use which variation. Since it is needed only in classes exported to DLLs, places other than <code>MarbleCommon</code> it is not needed to be defined. For further information see this <a href="https://msdn.microsoft.com/en-us/library/3y1sfaz2.aspx">MSDN article</a>. NB. this is a Microsoft-specific and Windows-only workaround.</p>
+
+<p>Here is, how to define this class:</p>
+
+<div class="highlight highlight-source-c++"><pre><span class="pl-en">FirstProcessor::FirstProcessor</span>(QObject *parent)
     : Processor(<span class="pl-s"><span class="pl-pds">"</span>My first Processor<span class="pl-pds">"</span></span>, parent)
 {
 }</pre></div>
@@ -66,7 +70,7 @@
 
 <p>The resemblance is uncanny with the processors. You will just have to create a new <code>Layer</code> class of yours (call it, for the sake of simplicity, <code>FirstLayer</code>), make it a descendant of the <code>Layer</code> abstract class and pass your <em>layer's name</em> to the parent constructor. The layer-related files lie with other GUI files, in the <tt>GrainAutLine/Layers</tt> directory. A very basic implementation would look like this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">class</span> <span class="pl-en">FirstLayer</span> : <span class="pl-k">public</span> <span class="pl-en">Layer</span>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">class</span> <span class="pl-en">FirstLayer</span> : <span class="pl-k">public</span> <span class="pl-en">Layer</span>
 {
     Q_OBJECT
 <span class="pl-k">public:</span>
@@ -74,7 +78,7 @@
     <span class="pl-en">~FirstLayer</span>() = <span class="pl-k">default</span>;
 }<span class="pl-ii"></span></pre></div>
 
-<div class="highlight highlight-c++"><pre><span class="pl-en">FirstLayer::FirstLayer</span>(QObject *parent)
+<div class="highlight highlight-source-c++"><pre><span class="pl-en">FirstLayer::FirstLayer</span>(QObject *parent)
     : Layer(<span class="pl-s"><span class="pl-pds">"</span>My first layer<span class="pl-pds">"</span></span>, parent)
 {
 }</pre></div>
@@ -88,11 +92,11 @@
 
 <p>The <code>Processor_</code> variable will hold your custom processor. Create a new instance of it:</p>
 
-<div class="highlight highlight-c++"><pre>Processor_ = std::make_shared&lt;FirstProcessor&gt;(<span class="pl-v">this</span>);</pre></div>
+<div class="highlight highlight-source-c++"><pre>Processor_ = std::make_shared&lt;FirstProcessor&gt;();</pre></div>
 
 <p>The <code>Layers</code> vector holds all the layers you want to use later. Previously we created only one, <code>FirstLayer</code>, but feel free to either add it multiple times or create many different layers later and add them here:</p>
 
-<div class="highlight highlight-c++"><pre>Layers.push_back(std::make_shared&lt;FirstLayer&gt;(<span class="pl-v">this</span>));</pre></div>
+<div class="highlight highlight-source-c++"><pre>Layers.push_back(std::make_shared&lt;FirstLayer&gt;());</pre></div>
 
 <p>Note that layers are optional extensions for a <code>Processor</code> determined to show the internal state of the latter. Therefore it's not necessary to attach a layer at all.</p>
 
@@ -103,7 +107,7 @@
 
 <p>When you are ready with your modifications so far, you are needed to register your <code>ProcessorSlot</code> in <code>SlotManager</code>. This is quite easy, just add your class to the following container in its constructor like this:</p>
 
-<div class="highlight highlight-c++"><pre>NonElementarySlots.push_back(
+<div class="highlight highlight-source-c++"><pre>NonElementarySlots.push_back(
     std::make_shared&lt;ProcessorSlot&gt;(ProcessorSlot::Type::MyFirstProcessorSlot, <span class="pl-v">this</span>)
   );</pre></div>
 
@@ -120,13 +124,13 @@
 <li>for the computation itself:</li>
 </ul>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">bool</span> <span class="pl-en">FirstProcessor::Step</span>(ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">bool</span> <span class="pl-en">FirstProcessor::Step</span>(ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
 
 <ul>
 <li>and for the drawing:</li>
 </ul>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd) <span class="pl-k">override</span>;</pre></div>
 
 <p>Have a nice time coding!</p>
 
@@ -147,8 +151,12 @@
 
 <ul>
 <li>Its <code>Processor</code> always runs regardless of everything. This is necessary for making such fundamental tasks done like the raw image rendering. This means that:
--- its <code>Processor</code> will run after a non-elementary <code>Processor</code>;
--- and unconditionally after a key or mouse event occurred.</li>
+
+<ul>
+<li>its <code>Processor</code> will run after a non-elementary <code>Processor</code>;</li>
+<li>and unconditionally after a key or mouse event occurred.</li>
+</ul>
+</li>
 <li>Its <code>Processor</code> name doesn't show up in the drop-down processor selector list on the GUI, so it cannot be selected to run alone.</li>
 <li>This infers that an elementary <code>Processor</code> cannot have properties configured from the GUI, since its property window will never be displayed.</li>
 <li>Nevertheless, it still can have as many layers as you want and these layers are always shown until the user decides to turn them off.</li>
@@ -156,7 +164,7 @@
 
 <p>To make a <code>ProcessorSlot</code> elementary, just set the <code>Elementary_</code> variable to <code>true</code> in the <code>ProcessorSlot</code> constructor. Just like the following example does:</p>
 
-<div class="highlight highlight-c++"><pre>[…]
+<div class="highlight highlight-source-c++"><pre>[…]
 <span class="pl-k">case</span> Type::ShowImage:
         Processor_ = std::make_shared&lt;ShowImageProcessor&gt;(<span class="pl-v">this</span>);
         Layers.push_back(std::make_shared&lt;ShowImageLayer&gt;(<span class="pl-v">this</span>));
@@ -184,24 +192,24 @@
 <li>
 <p><em>Float type</em>: You can store a <code>float</code> value inside with a <em>minimum</em> and <em>maximum</em> range provided.</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
                  <span class="pl-k">const</span> <span class="pl-k">float</span> minimum,
                  <span class="pl-k">const</span> <span class="pl-k">float</span> maximum,
                  <span class="pl-k">const</span> <span class="pl-k">float</span> default_);</pre></div>
 
 <p>Reading its value is possible by its name with the following function:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">float</span> <span class="pl-en">GetFloatPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">float</span> <span class="pl-en">GetFloatPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
 </li>
 <li>
 <p><em>Boolean type</em>: You can store a <code>bool</code> value inside.</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">AddProperty</span>(<span class="pl-k">const</span> QString&amp; name,
                  <span class="pl-k">const</span> <span class="pl-k">bool</span> default_);</pre></div>
 
 <p>Reading its value is possible by its name with the following function:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">bool</span> <span class="pl-en">GetBoolPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">bool</span> <span class="pl-en">GetBoolPropertyValue</span>(<span class="pl-k">const</span> QString&amp; name);</pre></div>
 </li>
 </ol>
 
@@ -210,7 +218,7 @@
 
 <p>A <code>Processor</code> works this simplified way: when a mouse click occurred or a new image file was loaded, the <code>Run</code> method starts and calls <code>Step</code> until it returns <code>false</code>. If you need more elaborate control, you can override this method. Its default implementation looks like the following:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">Processor::Run</span>(ProcessingStateDescriptor&amp; psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">Processor::Run</span>(ProcessingStateDescriptor&amp; psd)
 {
     <span class="pl-k">while</span>(<span class="pl-c1">Step</span>(psd) == <span class="pl-c1">true</span>)
         ;
@@ -259,7 +267,7 @@
 
 <p>By default, a <code>Processor</code> doesn't receive these mouse events. To do so, add the desired ones to the <code>SubscribedMouseEvents</code> <a href="http://www.cplusplus.com/reference/unordered_set/unordered_set/"><code>unordered_set</code></a> structure like this:</p>
 
-<div class="highlight highlight-c++"><pre>SubscribedMouseEvents = {QEvent::MouseButtonRelease, QEvent::MouseMove};</pre></div>
+<div class="highlight highlight-source-c++"><pre>SubscribedMouseEvents = {QEvent::MouseButtonRelease, QEvent::MouseMove};</pre></div>
 
 <p>You may add them directly at the construction time of your class, although you can modify these values any time you want; the changes will come into effect before the next run of your <code>Processor</code>.</p>
 
@@ -270,13 +278,13 @@
 
 <p>Supposing you're already subscribed to the desired mouse events, your processor will receive them in the following <code>virtual</code> function:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent&amp; event,
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent&amp; event,
                                 <span class="pl-k">const</span> QString&amp; canvasName,
                                 ProcessingStateDescriptor&amp; psd)</pre></div>
 
 <p>The first variable contains the event itself. You can determine its type by using the <code>type()</code> function of its. For example if you are subscribed to the previously mentioned events, you can distinguish between them in the following way:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
 {
     <span class="pl-c">// Refresh the MouseEvent variable both on QEvent::MouseButtonRelease and QEvent::MouseMove</span>
     MouseEvent = event;
@@ -290,7 +298,7 @@
 
 <p>By default a non-elementary <code>Processor</code> won't run after a mouse or keyboard event occurred. To force it, simply call <code>RunInThread()</code> where you want to start the computing like in this custom mouse click handler:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseClicked</span>(<span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseClicked</span>(<span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
 {
     <span class="pl-c1">Q_UNUSED</span>(canvasName)
 
@@ -300,7 +308,7 @@
 
 <p>Warning! Always make sure that the <code>ComputationReady</code> signal is emitted from a <em>non-elementary</em> processor's keyboard or mouse event handling function. It can be either a <code>RunInThread</code> call which automatically emits this signal at the end of its run or emit it manually. This guarantees the follow-up elementary processors will run and the screen is refreshed. An example for this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">MyFirstProcessor::MouseEventOccurred</span>(<span class="pl-k">const</span> QMouseEvent &amp;event, <span class="pl-k">const</span> QString &amp;canvasName, ProcessingStateDescriptor &amp;psd)
 {
     <span class="pl-k">if</span> (event.<span class="pl-c1">type</span>() == QEvent::MouseButtonRelease) {
         <span class="pl-c1">RunInThread</span>(psd);
@@ -330,7 +338,7 @@
 
 <p>An example which calls the custom <code>CreateMagic()</code> function of your <code>FirstProcessor</code>:</p>
 
-<div class="highlight highlight-c++"><pre>GetProcessor&lt;FirstProcessor&gt;()-&gt;<span class="pl-en">CreateMagic</span>();</pre></div>
+<div class="highlight highlight-source-c++"><pre>GetProcessor&lt;FirstProcessor&gt;()-&gt;<span class="pl-en">CreateMagic</span>();</pre></div>
 
 <h3>
 <a id="sequences" class="anchor" href="#sequences" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sequences</h3>
@@ -342,7 +350,7 @@
 
 <p>This is the function in you are free to leverage your creativity. One thing you need to pay a bit attention to: emit the <em>iAmReadyWithRendering</em> signal, here called <code>RenderReady</code> if you want your layer image to be shown. For example like this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">FirstLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor&amp; psd)
 {
     <span class="pl-c">// Generate image to cv::Mat</span>
     <span class="pl-k">const</span> cv::Mat image = psd.<span class="pl-c1">ExportToImage</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
@@ -352,7 +360,7 @@
 
 <p>The signal signature is the following:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">RenderReady</span>(<span class="pl-k">const</span> QString&amp; canvasName, <span class="pl-c">// Name of the canvas to draw on</span>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">RenderReady</span>(<span class="pl-k">const</span> QString&amp; canvasName, <span class="pl-c">// Name of the canvas to draw on</span>
                  <span class="pl-k">const</span> <span class="pl-k">int</span> layerSequence,   <span class="pl-c">// Sequence ID of the current layer</span>
                  <span class="pl-k">const</span> cv::Mat&amp; mat,        <span class="pl-c">// The finished image in cv::Mat format</span>
                  <span class="pl-k">const</span> <span class="pl-k">float</span> opacity,       <span class="pl-c">// Opacity of the current layer set on the GUI</span>
@@ -363,7 +371,7 @@
 
 <p>Since converting many cv::Mats from the processors on every pixel the mouse advanced to can be a really time consuming operation, always use cache. If the <code>Layer</code> knows that the image didn't change, recall the previously rendered <code>cv::Mat</code> from member variable <code>Cache</code>. An example showing this:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">void</span> <span class="pl-en">ShowImageLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor &amp;psd)
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">ShowImageLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor &amp;psd)
 {
     <span class="pl-k">bool</span> dirty = <span class="pl-c1">true</span>;
 
@@ -383,7 +391,7 @@
 
 <p>Supposedly, your cache depends on the very image file. If a new one got loaded, the cache has to be invalidated. In this case you simply have to override the appropriate function <code>FileOpened</code>. It is defined in classes <code>Processor</code>, <code>Layer</code> and <code>ImageProvider</code>:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Processor::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Processor::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);
 <span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Layer::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);
 <span class="pl-k">void</span> <span class="pl-en">ImageProvider::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);</pre></div>
 
@@ -413,11 +421,11 @@
 
 <p>By default it renders on the main canvas. If you want to specify another render target, override the following virtual function of your layer:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-k">virtual</span> QString <span class="pl-en">GetTargetCanvas</span>() <span class="pl-k">const</span>;</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-k">virtual</span> QString <span class="pl-en">GetTargetCanvas</span>() <span class="pl-k">const</span>;</pre></div>
 
 <p>Then return the target canvas name, e.g. <code>supplementaryCanvas</code>:</p>
 
-<div class="highlight highlight-c++"><pre>QString <span class="pl-en">MyFirstLayer::GetTargetCanvas</span>() <span class="pl-k">const</span>
+<div class="highlight highlight-source-c++"><pre>QString <span class="pl-en">MyFirstLayer::GetTargetCanvas</span>() <span class="pl-k">const</span>
 {
     <span class="pl-k">return</span> <span class="pl-c1">QStringLiteral</span>(<span class="pl-s"><span class="pl-pds">"</span>supplementaryCanvas<span class="pl-pds">"</span></span>);
 }</pre></div>
@@ -431,10 +439,10 @@
 <li>
 <p><em>QML</em>: First of all, decide where the new canvas has to be displayed  and then create a <code>PsdCanvas</code> element there in the appropriate QML file. Set the object name to your new canvas name. Something like this:</p>
 
-<div class="highlight highlight-qml"><pre><span class="pl-c1">PsdCanvas</span> {
+<div class="highlight highlight-source-qml"><pre><span class="pl-c1">PsdCanvas</span> {
 <span class="pl-e">    objectName</span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>histogram<span class="pl-pds">"</span></span>
     <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span><span class="pl-k">:</span> <span class="pl-c1">250</span>
-    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredHeight</span><span class="pl-k">:</span> <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span> / <span class="pl-c1">2</span>
+    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredHeight</span><span class="pl-k">:</span> <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span> <span class="pl-k">/</span> <span class="pl-c1">2</span>
 }</pre></div>
 </li>
 <li><p>Right after that, just create a new entry in the <code>ImageProvider::CanvasNames</code> static container with your new canvas name. It is located in the beginning of the <code>ImageProvider.cpp</code> source file.</p></li>
@@ -469,6 +477,10 @@
 <td>A message generated by the <a href="http://doc.qt.io/qt-5/qtglobal.html#qDebug">qDebug</a>() function.</td>
 </tr>
 <tr>
+<td>QtInfoMsg</td>
+<td>A message generated by the <a href="http://doc.qt.io/qt-5/qtglobal.html#qInfo">qInfo</a>() function.</td>
+</tr>
+<tr>
 <td>QtWarningMsg</td>
 <td>A message generated by the <a href="http://doc.qt.io/qt-5/qtglobal.html#qWarning">qWarning</a>() function.</td>
 </tr>
@@ -487,7 +499,7 @@
 
 <p>A <em>category</em> can also be associated with a message. If you want to distinguish messages based on categories, you just need to use the functions above with <code>C</code> like, <code>qCDebug()</code>, <code>qCWarning()</code> and so forth while providing the category as a parameter. An example:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-en">qCDebug</span>(funCategory) &lt;&lt; "Take one down and pass it around," &lt;&lt; remainingBeers &lt;&lt; "bottles of beer on the wall.";</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-en">qCDebug</span>(funCategory) &lt;&lt; "Take one down and pass it around," &lt;&lt; remainingBeers &lt;&lt; "bottles of beer on the wall.";</pre></div>
 
 <p>Don't forget that <code>qDebug()</code> takes care of the spaces and newlines for you.</p>
 
@@ -498,11 +510,11 @@
 
 <p>To create a new category, just append the following line to <code>LogCategories.h</code>:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-en">Q_DECLARE_LOGGING_CATEGORY</span>(developerName)</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-en">Q_DECLARE_LOGGING_CATEGORY</span>(developerName)</pre></div>
 
 <p>And its pair to <code>LogCategories.cpp</code>:</p>
 
-<div class="highlight highlight-c++"><pre><span class="pl-en">Q_LOGGING_CATEGORY</span>(developerName, <span class="pl-s"><span class="pl-pds">"</span>dev.developerName<span class="pl-pds">"</span></span>, QtWarningMsg)</pre></div>
+<div class="highlight highlight-source-c++"><pre><span class="pl-en">Q_LOGGING_CATEGORY</span>(developerName, <span class="pl-s"><span class="pl-pds">"</span>dev.developerName<span class="pl-pds">"</span></span>, QtWarningMsg)</pre></div>
 
 <p>From now on you are eligible to use logging functions like this: <code>qCDebug(developerName)</code> or <code>qCCritical(developerName)</code>.</p>
 
@@ -513,6 +525,37 @@
 </ol>
 
 <p>Unfortunately, turning them on and off conveniently from a preferences file is currently not supported. Please, check back later for it.</p>
+
+<h2>
+<a id="gpu-information" class="anchor" href="#gpu-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>GPU information</h2>
+
+<p>If you would like to access some of the information the target GPU provides, use the static methods of <code>GpuChecker</code> class:</p>
+
+<ul>
+<li>
+<code>static bool SystemCudaCapable()</code>: tells whether GrainAutLine has <a href="https://developer.nvidia.com/cuda-zone">CUDA</a> support compiled in and the current system can run CUDA applications.</li>
+<li>
+<code>static QList&lt;QString&gt; GetCudaDeviceNames()</code>: returns a list of CUDA cabable devices.</li>
+<li>
+<code>static bool SetCurrentDeviceId(const int value)</code>: sets the current CUDA device to <code>value</code>.</li>
+<li>
+<code>static int GetCurrentDeviceId()</code>: returns the ID of above.</li>
+<li>
+<code>static QString GetCurrentDeviceName()</code>: returns the currently selected CUDA-capable GPU name.</li>
+</ul>
+
+<p>The <code>HAVE_CUDA</code> macro is defined if CUDA support is available at compile time.</p>
+
+<p>The following globally defined macros help track down some various GPU-related function call errors:</p>
+
+<ul>
+<li>
+<code>cudaCheckError(cudaError_t error)</code>: prints out the CUDA error message then exits if there is one. This macro is only available when CUDA support is enabled at compile-time.</li>
+<li>
+<code>nppCheckError(NppStatus result)</code>: prints the <a href="https://developer.nvidia.com/NPP">NVIDIA Performance Primitives (NPP)</a> call error message then exits if there is one. Also prints its warnings, but in this case doesn't quit. This macro is only available when CUDA support is enabled at compile-time.</li>
+<li>
+<code>glCheckError()</code>: prints if there were <a href="https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glGetError.xml">OpenGL errors</a> previously. Use this function sparingly because it causes synchronisation. This macro is always available at compile-time, but call only when an OpenGL context is <a href="http://doc.qt.io/qt-5/qopenglcontext.html#isValid">valid</a>.</li>
+</ul>
 
       <footer class="site-footer">
 
