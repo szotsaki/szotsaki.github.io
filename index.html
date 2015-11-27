@@ -355,7 +355,7 @@
     <span class="pl-c">// Generate image to cv::Mat</span>
     <span class="pl-k">const</span> cv::Mat image = psd.<span class="pl-c1">ExportToImage</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
 
-    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), image, <span class="pl-c1">GetOpacity</span>(), <span class="pl-c1">true</span>);
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), image, <span class="pl-c1">GetOpacity</span>(), CanvasCacheBase::allDirty);
 }</pre></div>
 
 <p>The signal signature is the following:</p>
@@ -364,7 +364,7 @@
                  <span class="pl-k">const</span> <span class="pl-k">int</span> layerSequence,   <span class="pl-c">// Sequence ID of the current layer</span>
                  <span class="pl-k">const</span> cv::Mat&amp; mat,        <span class="pl-c">// The finished image in cv::Mat format</span>
                  <span class="pl-k">const</span> <span class="pl-k">float</span> opacity,       <span class="pl-c">// Opacity of the current layer set on the GUI</span>
-                 <span class="pl-k">const</span> <span class="pl-k">bool</span> dirty);         <span class="pl-c">// true only if the cv::Mat has been changed</span></pre></div>
+                 <span class="pl-k">const</span> cv::<span class="pl-c1">Rect</span> dirtyRoI);  <span class="pl-c">// Dirty region of the layer (which was modified)</span></pre></div>
 
 <h3>
 <a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h3>
@@ -373,7 +373,7 @@
 
 <div class="highlight highlight-source-c++"><pre><span class="pl-k">void</span> <span class="pl-en">ShowImageLayer::Render</span>(<span class="pl-k">const</span> ProcessingStateDescriptor &amp;psd)
 {
-    <span class="pl-k">bool</span> dirty = <span class="pl-c1">true</span>;
+    cv::<span class="pl-c1">Rect</span> dirtyRoI = CanvasCacheBase::allDirty;
 
     <span class="pl-k">if</span> (Cache.<span class="pl-smi">data</span> == <span class="pl-v">nullptr</span>) {
         cv::Mat imgOriginal = <span class="pl-c1">cv::imread</span>(psd.<span class="pl-smi">ImageFileName</span>, CV_LOAD_IMAGE_COLOR);
@@ -381,10 +381,10 @@
 
         Cache = imgOriginal;
     } <span class="pl-k">else</span> {
-        dirty = <span class="pl-c1">false</span>;
+        dirtyRoI = CanvasCacheBase::noneDirty;
     }
 
-    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), Cache, <span class="pl-c1">GetOpacity</span>(), dirty);
+    emit <span class="pl-smi">RenderReady</span>(<span class="pl-c1">GetTargetCanvas</span>(), <span class="pl-c1">GetSequence</span>(), Cache, <span class="pl-c1">GetOpacity</span>(), dirtyRoI);
 }</pre></div>
 
 <p>Beware, that your condition on invalidating the cache might be different.</p>
@@ -396,6 +396,8 @@
 <span class="pl-k">void</span> <span class="pl-en">ImageProvider::FileOpened</span>(<span class="pl-k">const</span> QString&amp; fileName);</pre></div>
 
 <p>As soon as this function is invoked, you can be sure a new image file has been loaded already. Be careful as this function gets called both when an image file or a <code>.prc</code> file was opened. If it's needed for your class to differentiate between these formats, use the provided <code>fileName</code> parameter.</p>
+
+<p>The dirty region attribute is a standard <code>cv::Rect</code>. If you just want to indicate that all of the pixels of your layer were modified, use <code>CanvasCacheBase::allDirty</code>. On the other hand, to indicate that none of the pixels were modified, use <code>CanvasCacheBase::noneDirty</code> as the example above.</p>
 
 <h3>
 <a id="additional-canvases" class="anchor" href="#additional-canvases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Additional canvases</h3>
@@ -441,8 +443,8 @@
 
 <div class="highlight highlight-source-qml"><pre><span class="pl-c1">PsdCanvas</span> {
 <span class="pl-e">    objectName</span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>histogram<span class="pl-pds">"</span></span>
-    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span><span class="pl-k">:</span> <span class="pl-c1">250</span>
-    <span class="pl-c1">Layout</span>.<span class="pl-e">preferredHeight</span><span class="pl-k">:</span> <span class="pl-c1">Layout</span>.<span class="pl-e">preferredWidth</span> <span class="pl-k">/</span> <span class="pl-c1">2</span>
+    <span class="pl-c1">Layout</span>.<span class="pl-smi">preferredWidth</span><span class="pl-k">:</span> <span class="pl-c1">250</span>
+    <span class="pl-c1">Layout</span>.<span class="pl-smi">preferredHeight</span><span class="pl-k">:</span> <span class="pl-c1">Layout</span>.<span class="pl-smi">preferredWidth</span> <span class="pl-k">/</span> <span class="pl-c1">2</span>
 }</pre></div>
 </li>
 <li><p>Right after that, just create a new entry in the <code>ImageProvider::CanvasNames</code> static container with your new canvas name. It is located in the beginning of the <code>ImageProvider.cpp</code> source file.</p></li>
@@ -541,10 +543,10 @@
 <li>
 <code>static int GetCurrentDeviceId()</code>: returns the ID of above.</li>
 <li>
-<code>static QString GetCurrentDeviceName()</code>: returns the currently selected CUDA-capable GPU name.</li>
+<code>static QString GetCurrentDeviceName()</code>: returns the currently selected CUDA-capable GPU name.
+capable
+The <code>HAVE_CUDA</code> macro is defined if CUDA support is available at compile time.</li>
 </ul>
-
-<p>The <code>HAVE_CUDA</code> macro is defined if CUDA support is available at compile time.</p>
 
 <p>The following globally defined macros help track down some various GPU-related function call errors:</p>
 
