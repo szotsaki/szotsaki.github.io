@@ -537,16 +537,16 @@
 <li>
 <code>static bool SystemCudaCapable()</code>: tells whether GrainAutLine has <a href="https://developer.nvidia.com/cuda-zone">CUDA</a> support compiled in and the current system can run CUDA applications.</li>
 <li>
-<code>static QList&lt;QString&gt; GetCudaDeviceNames()</code>: returns a list of CUDA cabable devices.</li>
+<code>static QList&lt;QString&gt; GetCudaDeviceNames()</code>: returns a list of CUDA capable devices.</li>
 <li>
 <code>static bool SetCurrentDeviceId(const int value)</code>: sets the current CUDA device to <code>value</code>.</li>
 <li>
 <code>static int GetCurrentDeviceId()</code>: returns the ID of above.</li>
 <li>
-<code>static QString GetCurrentDeviceName()</code>: returns the currently selected CUDA-capable GPU name.
-capable
-The <code>HAVE_CUDA</code> macro is defined if CUDA support is available at compile time.</li>
+<code>static QString GetCurrentDeviceName()</code>: returns the currently selected CUDA-capable GPU name.</li>
 </ul>
+
+<p>The <code>HAVE_CUDA</code> macro is defined if CUDA support is available at compile time.</p>
 
 <p>The following globally defined macros help track down some various GPU-related function call errors:</p>
 
